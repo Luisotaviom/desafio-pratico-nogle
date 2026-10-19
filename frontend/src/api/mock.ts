@@ -68,6 +68,13 @@ export const mockApi = {
     Object.assign(c, input, { complemento: input.complemento || null })
     return clone(c)
   },
+  async ativar(id: number): Promise<Cliente> {
+    await wait()
+    const c = db.find((x) => x.id === id)
+    if (!c) throw new ApiError(404, 'NOT_FOUND', 'Cliente não encontrado')
+    c.ativo = true
+    return clone(c)
+  },
   async inativar(id: number): Promise<Cliente> {
     await wait()
     const c = db.find((x) => x.id === id)
