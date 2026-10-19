@@ -1,4 +1,8 @@
 import { Router } from 'express';
+import { buscarCep } from '../services/cep';
 
-// Placeholder: GET /cep/:cep é implementado por outro agente neste arquivo.
 export const cepRouter = Router();
+
+cepRouter.get('/:cep', async (req, res) => {
+  res.json(await buscarCep(req.params.cep));
+});
