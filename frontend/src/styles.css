@@ -116,6 +116,13 @@ button, input { font: inherit; color: inherit; }
 .acoes .btn-warn { color: var(--muted); }
 .acoes-cell { white-space: nowrap; }
 
+.tabela tr.inativo td { color: #5a666f; }
+.tabela tr.inativo { background: #f3f5f6; }
+.tabela tr.inativo:hover { background: #f3f5f6; }
+.tabela tr.inativo .nome-cell { font-weight: 500; }
+.tabela tr.inativo .mono { background: #e2e6e9; color: #5b6770; }
+.selo { font: 600 12px var(--font-body); padding: 2px 8px; border-radius: 999px; background: #e2e6e9; color: #4a5660; }
+
 /* Estados */
 .estado { padding: 56px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .estado-ico { color: var(--accent); background: var(--accent-soft); padding: 14px; box-sizing: content-box; border-radius: 50%; margin-bottom: 8px; }
