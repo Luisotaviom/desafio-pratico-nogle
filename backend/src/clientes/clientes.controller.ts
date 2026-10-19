@@ -49,3 +49,7 @@ export async function atualizar(req: Request, res: Response) {
 export async function inativar(req: Request, res: Response) {
   res.json(await service.inativar(lerId(req)));
 }
+
+export async function ativar(req: Request, res: Response) {
+  res.json(await service.ativar(lerId(req)));
+}

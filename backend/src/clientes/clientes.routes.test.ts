@@ -102,3 +102,24 @@ describe('GET /api/clientes', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('PATCH /api/clientes/:id/ativar', () => {
+  it('reativa o cliente e responde 200', async () => {
+    vi.mocked(service.ativar).mockResolvedValue({ id: 1, ativo: true } as never);
+
+    const res = await request(app).patch('/api/clientes/1/ativar');
+
+    expect(res.status).toBe(200);
+    expect(res.body.ativo).toBe(true);
+    expect(service.ativar).toHaveBeenCalledWith(1);
+  });
+
+  it('retorna NOT_FOUND 404 quando o cliente não existe', async () => {
+    vi.mocked(service.ativar).mockRejectedValue(new AppError('NOT_FOUND', 'Cliente não encontrado'));
+
+    const res = await request(app).patch('/api/clientes/99/ativar');
+
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('NOT_FOUND');
+  });
+});

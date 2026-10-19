@@ -46,6 +46,7 @@ backend e frontend não o alteram (mudanças só pela `main`).
 | POST | `/clientes` | Cria (sem `id` e `ativo`) | 201 `Cliente` |
 | PUT | `/clientes/:id` | Edita todos os campos editáveis | 200 `Cliente` |
 | PATCH | `/clientes/:id/inativar` | Inativação lógica (`ativo=false`) | 200 `Cliente` |
+| PATCH | `/clientes/:id/ativar` | Reativa o cliente (`ativo=true`); idempotente | 200 `Cliente` |
 | GET | `/cep/:cep` | Consulta CEP (ViaCEP, fallback BrasilAPI) | 200 `{ cep, endereco, bairro, cidade, estado }` |
 
 Regras de validação (POST/PUT): todos os campos obrigatórios exceto `complemento`; CPF com dígitos verificadores
