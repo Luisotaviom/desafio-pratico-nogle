@@ -1,0 +1,195 @@
+{
+  "id": "87234bfc-9fe3-4eb1-bb0d-581fc6a0aac4",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.clientes": {
+      "name": "clientes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "clientes_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cpf": {
+          "name": "cpf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telefone": {
+          "name": "telefone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cep": {
+          "name": "cep",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cidade": {
+          "name": "cidade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "endereco": {
+          "name": "endereco",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bairro": {
+          "name": "bairro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "numero": {
+          "name": "numero",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "complemento": {
+          "name": "complemento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_clientes_nome": {
+          "name": "idx_clientes_nome",
+          "columns": [
+            {
+              "expression": "LOWER(\"nome\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "clientes_cpf_unique": {
+          "name": "clientes_cpf_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cpf"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "clientes_nome_check": {
+          "name": "clientes_nome_check",
+          "value": "char_length(\"clientes\".\"nome\") BETWEEN 1 AND 150"
+        },
+        "clientes_cpf_check": {
+          "name": "clientes_cpf_check",
+          "value": "\"clientes\".\"cpf\" ~ '^[0-9]{11}$'"
+        },
+        "clientes_telefone_check": {
+          "name": "clientes_telefone_check",
+          "value": "\"clientes\".\"telefone\" ~ '^[0-9]{10,11}$'"
+        },
+        "clientes_cep_check": {
+          "name": "clientes_cep_check",
+          "value": "\"clientes\".\"cep\" ~ '^[0-9]{8}$'"
+        },
+        "clientes_cidade_check": {
+          "name": "clientes_cidade_check",
+          "value": "char_length(\"clientes\".\"cidade\") BETWEEN 1 AND 100"
+        },
+        "clientes_estado_check": {
+          "name": "clientes_estado_check",
+          "value": "\"clientes\".\"estado\" ~ '^[A-Z]{2}$'"
+        },
+        "clientes_endereco_check": {
+          "name": "clientes_endereco_check",
+          "value": "char_length(\"clientes\".\"endereco\") BETWEEN 1 AND 200"
+        },
+        "clientes_bairro_check": {
+          "name": "clientes_bairro_check",
+          "value": "char_length(\"clientes\".\"bairro\") BETWEEN 1 AND 100"
+        },
+        "clientes_numero_check": {
+          "name": "clientes_numero_check",
+          "value": "char_length(\"clientes\".\"numero\") BETWEEN 1 AND 20"
+        },
+        "clientes_complemento_check": {
+          "name": "clientes_complemento_check",
+          "value": "char_length(\"clientes\".\"complemento\") <= 100"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
