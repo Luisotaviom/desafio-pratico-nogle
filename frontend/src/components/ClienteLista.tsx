@@ -47,14 +47,16 @@ export function ClienteLista({ clientes, onEdit, onInativar }: Props) {
       </thead>
       <tbody>
         {clientes.map((c) => (
-          <tr key={c.id}>
+          <tr key={c.id} className={c.ativo ? undefined : 'inativo'}>
             <td data-label="Nome">
-              <span className="nome-cell"><Iniciais nome={c.nome} /><span>{c.nome}</span></span>
+              <span className="nome-cell"><Iniciais nome={c.nome} /><span>{c.nome}</span>{!c.ativo && <span className="selo">Inativo</span>}</span>
             </td>
             <td data-label="CPF" className="num">{maskCpf(c.cpf)}</td>
             <td data-label="Telefone" className="num">{maskTelefone(c.telefone)}</td>
             <td data-label="Endereço">{enderecoCompleto(c)}</td>
-            <td className="acoes-cell"><Acoes c={c} onEdit={onEdit} onInativar={onInativar} /></td>
+            <td className="acoes-cell">
+              {c.ativo ? <Acoes c={c} onEdit={onEdit} onInativar={onInativar} /> : <span className="sr-only">Cliente inativo, sem ações</span>}
+            </td>
           </tr>
         ))}
       </tbody>

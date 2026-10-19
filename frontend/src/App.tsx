@@ -27,7 +27,7 @@ export default function App() {
     setLoading(true)
     setErro(null)
     try {
-      const data = await listarClientes({ nome: dNome, cpf: onlyDigits(dCpf) })
+      const data = await listarClientes({ nome: dNome, cpf: onlyDigits(dCpf), ativo: 'all' })
       if (id === reqId.current) setClientes(data)
     } catch (e) {
       if (id === reqId.current) setErro(e instanceof ApiError ? e.message : 'Erro inesperado ao carregar')
@@ -48,6 +48,12 @@ export default function App() {
   const fechar = () => { setModal(null); origem.current?.focus() }
 
   const filtrando = Boolean(dNome.trim() || dCpf)
+  const ativos = clientes.filter((c) => c.ativo).length
+  const inativos = clientes.length - ativos
+  const resumo =
+    `${ativos} ${ativos === 1 ? 'cliente ativo' : 'clientes ativos'}` +
+    (inativos ? ` · ${inativos} ${inativos === 1 ? 'inativo' : 'inativos'}` : '') +
+    (filtrando ? ' na busca' : '')
 
   return (
     <div className="app">
@@ -58,7 +64,7 @@ export default function App() {
             <p className="sub">
               {loading && clientes.length === 0
                 ? 'Carregando cadastro…'
-                : `${clientes.length} ${clientes.length === 1 ? 'cliente' : 'clientes'} ${filtrando ? 'na busca' : clientes.length === 1 ? 'ativo' : 'ativos'}`}
+                : resumo}
             </p>
           </div>
           <button type="button" className="btn btn-light" onClick={() => abrir({ tipo: 'form', cliente: null })}>
