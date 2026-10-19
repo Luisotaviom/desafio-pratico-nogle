@@ -20,7 +20,7 @@ CRUD de clientes em tela única: cadastro, edição, inativação e reativação
 | Backend | Node.js, Express 5, TypeScript, Zod (validação) |
 | Banco | PostgreSQL com Drizzle ORM (`drizzle-kit` para migrations) |
 | Frontend | React 19, Vite, TypeScript, CSS puro |
-| CEP | ViaCEP, com BrasilAPI como fallback |
+| API de CEP (externa) | [ViaCEP](https://viacep.com.br) (`https://viacep.com.br/ws/{cep}/json/`) como principal e [BrasilAPI](https://brasilapi.com.br) (`https://brasilapi.com.br/api/cep/v1/{cep}`) como fallback, com timeout de 3s cada. O backend expõe `GET /api/cep/:cep` e o frontend nunca chama os provedores direto. |
 | Testes | Vitest e Supertest (backend) |
 
 ## Estrutura
@@ -170,9 +170,3 @@ cd backend && npm test
 ```
 
 Cobrem as rotas de clientes, a validação de CPF e o serviço de CEP (sucesso, fallback, CEP inexistente, provedores fora do ar e CEP inválido).
-
-## Entrega
-
-- [x] Código no GitHub
-- [x] Scripts das tabelas (`database/schema.sql`)
-- [ ] Vídeo de demonstração
