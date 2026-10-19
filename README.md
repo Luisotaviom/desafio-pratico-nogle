@@ -6,7 +6,7 @@ CRUD de clientes em tela única: cadastro, edição e inativação, com filtros 
 
 - **Backend:** Node.js (Express) + PostgreSQL
 - **Frontend:** React (Vite)
-- **CEP:** ViaCEP, com BrasilAPI como fallback
+- **CEP:** ViaCEP, com BrasilAPI como fallback ([detalhes](docs/cep.md))
 
 ## Estrutura
 
