@@ -50,6 +50,11 @@ export function atualizarCliente(id: number, input: ClienteInput): Promise<Clien
   return request<Cliente>(`/clientes/${id}`, { method: 'PUT', body: JSON.stringify(input) })
 }
 
+export function reativarCliente(id: number): Promise<Cliente> {
+  if (USE_MOCK) return mockApi.ativar(id)
+  return request<Cliente>(`/clientes/${id}/ativar`, { method: 'PATCH' })
+}
+
 export function inativarCliente(id: number): Promise<Cliente> {
   if (USE_MOCK) return mockApi.inativar(id)
   return request<Cliente>(`/clientes/${id}/inativar`, { method: 'PATCH' })

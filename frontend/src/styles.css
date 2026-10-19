@@ -121,6 +121,7 @@ button, input { font: inherit; color: inherit; }
 .tabela tr.inativo:hover { background: #f3f5f6; }
 .tabela tr.inativo .nome-cell { font-weight: 500; }
 .tabela tr.inativo .mono { background: #e2e6e9; color: #5b6770; }
+.acoes .btn-reativar { color: var(--accent); }
 .selo { font: 600 12px var(--font-body); padding: 2px 8px; border-radius: 999px; background: #e2e6e9; color: #4a5660; }
 
 /* Estados */

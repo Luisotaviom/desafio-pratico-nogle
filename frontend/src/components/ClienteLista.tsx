@@ -5,6 +5,8 @@ interface Props {
   clientes: Cliente[]
   onEdit: (c: Cliente) => void
   onInativar: (c: Cliente) => void
+  onReativar: (c: Cliente) => void
+  reativando: number | null
 }
 
 function Iniciais({ nome }: { nome: string }) {
@@ -32,7 +34,7 @@ function Acoes({ c, onEdit, onInativar }: { c: Cliente } & Pick<Props, 'onEdit' 
 }
 
 /** Tabela em telas largas; no CSS ela vira cards em telas estreitas. */
-export function ClienteLista({ clientes, onEdit, onInativar }: Props) {
+export function ClienteLista({ clientes, onEdit, onInativar, onReativar, reativando }: Props) {
   return (
     <table className="tabela">
       <caption className="sr-only">Clientes cadastrados</caption>
@@ -55,7 +57,18 @@ export function ClienteLista({ clientes, onEdit, onInativar }: Props) {
             <td data-label="Telefone" className="num">{maskTelefone(c.telefone)}</td>
             <td data-label="Endereço">{enderecoCompleto(c)}</td>
             <td className="acoes-cell">
-              {c.ativo ? <Acoes c={c} onEdit={onEdit} onInativar={onInativar} /> : <span className="sr-only">Cliente inativo, sem ações</span>}
+              {c.ativo ? (
+                <Acoes c={c} onEdit={onEdit} onInativar={onInativar} />
+              ) : (
+                <div className="acoes">
+                  <button type="button" className="btn btn-sm btn-ghost btn-reativar" onClick={() => onReativar(c)} disabled={reativando === c.id} aria-label={`Reativar ${c.nome}`}>
+                    {reativando === c.id ? <span className="spinner" aria-hidden="true" /> : (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8M3 3v5h5" /></svg>
+                    )}
+                    {reativando === c.id ? 'Reativando…' : 'Reativar'}
+                  </button>
+                </div>
+              )}
             </td>
           </tr>
         ))}

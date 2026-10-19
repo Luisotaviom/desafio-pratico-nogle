@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ApiError, listarClientes } from './api/clientes'
+import { ApiError, listarClientes, reativarCliente } from './api/clientes'
 import { ClienteLista } from './components/ClienteLista'
 import { ClienteModal } from './components/ClienteModal'
 import { ConfirmInativar } from './components/ConfirmInativar'
@@ -19,6 +19,7 @@ export default function App() {
   const [erro, setErro] = useState<string | null>(null)
   const [modal, setModal] = useState<Modal>(null)
   const [aviso, setAviso] = useState<string | null>(null)
+  const [reativando, setReativando] = useState<number | null>(null)
   const reqId = useRef(0)
   const origem = useRef<HTMLElement | null>(null)
 
@@ -43,6 +44,19 @@ export default function App() {
     const t = setTimeout(() => setAviso(null), 4000)
     return () => clearTimeout(t)
   }, [aviso])
+
+  async function reativar(c: Cliente) {
+    setReativando(c.id)
+    try {
+      await reativarCliente(c.id)
+      setAviso('Cliente reativado')
+      await carregar()
+    } catch (e) {
+      setAviso(e instanceof ApiError ? e.message : 'Erro inesperado ao reativar')
+    } finally {
+      setReativando(null)
+    }
+  }
 
   const abrir = (m: Modal) => { origem.current = document.activeElement as HTMLElement; setModal(m) }
   const fechar = () => { setModal(null); origem.current?.focus() }
@@ -121,6 +135,8 @@ export default function App() {
                 clientes={clientes}
                 onEdit={(c) => abrir({ tipo: 'form', cliente: c })}
                 onInativar={(c) => abrir({ tipo: 'inativar', cliente: c })}
+                onReativar={(c) => void reativar(c)}
+                reativando={reativando}
               />
             </div>
           )}
