@@ -79,11 +79,15 @@ export async function atualizar(id: number, dados: ClienteInput) {
   }
 }
 
-export async function inativar(id: number) {
+async function definirAtivo(id: number, ativo: boolean) {
   const [cliente] = await db
     .update(clientes)
-    .set({ ativo: false, atualizadoEm: new Date() })
+    .set({ ativo, atualizadoEm: new Date() })
     .where(eq(clientes.id, id))
     .returning(colunas);
   return cliente ?? naoEncontrado();
 }
+
+export const inativar = (id: number) => definirAtivo(id, false);
+
+export const ativar = (id: number) => definirAtivo(id, true);

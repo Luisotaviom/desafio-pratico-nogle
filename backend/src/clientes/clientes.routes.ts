@@ -14,3 +14,4 @@ clientesRouter.get('/:id', asyncHandler(controller.buscar));
 clientesRouter.post('/', asyncHandler(controller.criar));
 clientesRouter.put('/:id', asyncHandler(controller.atualizar));
 clientesRouter.patch('/:id/inativar', asyncHandler(controller.inativar));
+clientesRouter.patch('/:id/ativar', asyncHandler(controller.ativar));
