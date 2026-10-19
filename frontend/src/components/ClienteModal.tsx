@@ -34,8 +34,9 @@ export function ClienteModal({ cliente, onClose, onSaved }: Props) {
   const [formError, setFormError] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
-  // Ponto de extensão: quando a consulta de CEP devolver dados, preenche (continuam editáveis).
-  const cepData = useCepLookup(onlyDigits(values.cep))
+  // Em edição o CEP já salvo não é reconsultado (não sobrescreve o endereço do cliente).
+  const cepDigits = onlyDigits(values.cep)
+  const { data: cepData, status: cepStatus } = useCepLookup(cepDigits, cepDigits !== cliente?.cep)
   useEffect(() => {
     if (!cepData) return
     setValues((v) => ({
@@ -46,6 +47,7 @@ export function ClienteModal({ cliente, onClose, onSaved }: Props) {
       estado: cepData.estado || v.estado,
     }))
     setErrors((e) => ({ ...e, endereco: undefined, bairro: undefined, cidade: undefined, estado: undefined }))
+    formRef.current?.querySelector<HTMLElement>('#f-numero')?.focus()
   }, [cepData])
 
   const set = (name: keyof ClienteInput, mask?: (v: string) => string) =>
@@ -130,6 +132,11 @@ export function ClienteModal({ cliente, onClose, onSaved }: Props) {
             <Field {...f('bairro')} label="Bairro" span={3} onChange={set('bairro')} />
             <Field {...f('complemento')} label="Complemento" span={3} optional onChange={set('complemento')} />
           </div>
+          <p className={`cep-status${cepStatus === 'idle' ? '' : ' is-visible'}`} role="status">
+            {cepStatus === 'loading' && <><span className="spinner" aria-hidden="true" /> Buscando endereço…</>}
+            {cepStatus === 'notFound' && 'CEP não encontrado. Confira o número ou preencha o endereço manualmente.'}
+            {cepStatus === 'unavailable' && 'Não foi possível consultar o CEP agora. Preencha o endereço manualmente.'}
+          </p>
           {formError && <p className="form-error" role="alert">{formError}</p>}
         </div>
 
