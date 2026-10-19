@@ -120,10 +120,17 @@ export function ClienteModal({ cliente, onClose, onSaved }: Props) {
         </header>
 
         <div className="dialog-body">
-          <div className="grid">
+          <fieldset className="grupo">
+            <legend>Dados pessoais</legend>
+            <div className="grid">
             <Field {...f('nome')} label="Nome" span={6} autoFocus autoComplete="off" onChange={set('nome')} />
             <Field {...f('cpf')} label="CPF" span={3} inputMode="numeric" placeholder="000.000.000-00" onChange={set('cpf', maskCpf)} />
             <Field {...f('telefone')} label="Telefone" span={3} inputMode="tel" placeholder="(00) 00000-0000" onChange={set('telefone', maskTelefone)} />
+            </div>
+          </fieldset>
+          <fieldset className="grupo">
+            <legend>Endereço</legend>
+            <div className="grid">
             <Field {...f('cep')} label="CEP" span={2} inputMode="numeric" placeholder="00000-000" onChange={set('cep', maskCep)} />
             <Field {...f('cidade')} label="Cidade" span={3} onChange={set('cidade')} />
             <Field {...f('estado')} label="Estado" span={1} maxLength={2} placeholder="UF" autoCapitalize="characters" onChange={(e) => set('estado', (v) => v.toUpperCase().replace(/[^A-Z]/g, ''))(e)} />
@@ -131,7 +138,8 @@ export function ClienteModal({ cliente, onClose, onSaved }: Props) {
             <Field {...f('numero')} label="Número" span={2} onChange={set('numero')} />
             <Field {...f('bairro')} label="Bairro" span={3} onChange={set('bairro')} />
             <Field {...f('complemento')} label="Complemento" span={3} optional onChange={set('complemento')} />
-          </div>
+            </div>
+          </fieldset>
           <p className={`cep-status${cepStatus === 'idle' ? '' : ' is-visible'}`} role="status">
             {cepStatus === 'loading' && <><span className="spinner" aria-hidden="true" /> Buscando endereço…</>}
             {cepStatus === 'notFound' && 'CEP não encontrado. Confira o número ou preencha o endereço manualmente.'}

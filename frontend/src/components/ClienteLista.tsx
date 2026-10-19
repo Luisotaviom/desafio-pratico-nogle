@@ -10,14 +10,23 @@ interface Props {
 function Iniciais({ nome }: { nome: string }) {
   const p = nome.trim().split(/\s+/)
   const txt = (p[0]?.[0] ?? '') + (p.length > 1 ? p[p.length - 1][0] : '')
-  return <span className="mono" aria-hidden="true">{txt.toUpperCase()}</span>
+  let h = 0
+  for (const ch of nome) h = (h * 31 + ch.charCodeAt(0)) % 360
+  const style = { '--h': h } as React.CSSProperties
+  return <span className="mono" style={style} aria-hidden="true">{txt.toUpperCase()}</span>
 }
 
 function Acoes({ c, onEdit, onInativar }: { c: Cliente } & Pick<Props, 'onEdit' | 'onInativar'>) {
   return (
     <div className="acoes">
-      <button type="button" className="btn btn-sm btn-ghost" onClick={() => onEdit(c)} aria-label={`Editar ${c.nome}`}>Editar</button>
-      <button type="button" className="btn btn-sm btn-ghost btn-warn" onClick={() => onInativar(c)} aria-label={`Inativar ${c.nome}`}>Inativar</button>
+      <button type="button" className="btn btn-sm btn-ghost" onClick={() => onEdit(c)} aria-label={`Editar ${c.nome}`}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" /></svg>
+        Editar
+      </button>
+      <button type="button" className="btn btn-sm btn-ghost btn-warn" onClick={() => onInativar(c)} aria-label={`Inativar ${c.nome}`}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5" /><path d="M3 20c.6-3.4 3-5.5 7-5.5M16 15l5 5M21 15l-5 5" /></svg>
+        Inativar
+      </button>
     </div>
   )
 }
