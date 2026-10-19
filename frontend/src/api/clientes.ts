@@ -54,3 +54,15 @@ export function inativarCliente(id: number): Promise<Cliente> {
   if (USE_MOCK) return mockApi.inativar(id)
   return request<Cliente>(`/clientes/${id}/inativar`, { method: 'PATCH' })
 }
+
+export interface CepResult {
+  cep: string
+  endereco: string
+  bairro: string
+  cidade: string
+  estado: string
+}
+
+export function consultarCep(cep: string, signal?: AbortSignal): Promise<CepResult> {
+  return request<CepResult>(`/cep/${cep}`, { signal })
+}
