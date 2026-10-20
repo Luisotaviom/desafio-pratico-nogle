@@ -1,15 +1,17 @@
 # Desafio prático Nogle
 
-CRUD de clientes em tela única: cadastro, edição, inativação e reativação, com filtros por nome e CPF e preenchimento automático de cidade/estado pelo CEP.
+CRUD de clientes em tela única: cadastro, edição, inativação e reativação, com filtros por nome, CPF, estado e cidade e preenchimento automático de cidade/estado pelo CEP.
 
 ## Funcionalidades
 
 - Modal de novo cliente e de edição (Salvar / Cancelar). Todos os campos são obrigatórios, exceto complemento.
-- Filtros por **nome** e **CPF**, com debounce.
+- Filtros por **nome** e **CPF** (os do enunciado), mais **estado** (UF) e **cidade**. Combináveis, com debounce, e um botão para limpar todos.
+- Contador no topo ("N clientes ativos · N inativos") vindo de `/clientes/resumo`, no mesmo recorte dos filtros.
 - Tabela com nome, CPF, telefone e endereço completo, com ações **Editar**, **Inativar** e **Reativar**.
 - Inativação lógica (`ativo = false`): não há DELETE físico. Clientes inativos continuam na lista, acinzentados e com selo "Inativo".
 - Preenchimento de cidade, estado, endereço e bairro pelo CEP (ViaCEP, com BrasilAPI como fallback). Os campos continuam editáveis e, se a consulta falhar, o preenchimento manual segue liberado.
 - Validação de CPF (dígitos verificadores) e unicidade, no backend e no frontend.
+- Linha salva ou reativada fica destacada por instantes. Cancelar um modal com dados digitados pede confirmação antes de descartar.
 - Tela responsiva: a tabela vira cards no mobile.
 - Estados de loading e vazio, validação inline, feedback de sucesso e erro, foco e teclado acessíveis nos modais.
 
@@ -21,7 +23,7 @@ CRUD de clientes em tela única: cadastro, edição, inativação e reativação
 | Banco | PostgreSQL com Drizzle ORM (`drizzle-kit` para migrations) |
 | Frontend | React 19, Vite, TypeScript, CSS puro |
 | API de CEP (externa) | [ViaCEP](https://viacep.com.br) (`https://viacep.com.br/ws/{cep}/json/`) como principal e [BrasilAPI](https://brasilapi.com.br) (`https://brasilapi.com.br/api/cep/v1/{cep}`) como fallback, com timeout de 3s cada. O backend expõe `GET /api/cep/:cep` e o frontend nunca chama os provedores direto. |
-| Testes | Vitest e Supertest (backend) |
+| Testes | Vitest e Supertest (backend); Vitest (frontend) |
 
 ## Estrutura
 
@@ -85,9 +87,9 @@ npm run dev               # http://localhost:5173
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:3333/api` | URL base da API |
-| `VITE_USE_MOCK` | `true` no `.env.example` | `true` usa dados em memória (sem backend); **troque para `false` para usar a API real** (backend e banco rodando) |
+| `VITE_USE_MOCK` | `false` no `.env.example` | `false` usa a API real (backend e banco rodando). `true` usa dados em memória, útil para ver a interface sem backend |
 
-Scripts: `npm run dev`, `npm run build` (checagem de tipos + build), `npm run preview`.
+Scripts: `npm run dev`, `npm run build` (checagem de tipos + build), `npm run preview`, `npm test`.
 
 ## API
 
@@ -167,8 +169,9 @@ frontend/src/
   api/mock.ts                API em memória (VITE_USE_MOCK=true)
   components/                ClienteLista, ClienteModal, ConfirmInativar, Dialog, Field
   hooks/                     useCepLookup (com AbortController), useDebounce
-  lib/format.ts              Máscaras de CPF, telefone e CEP
+  lib/format.ts              Máscaras de CPF, telefone e CEP, endereço completo, lista de UFs
   lib/validation.ts          Validação do formulário (inclui CPF)
+  lib/*.test.ts              Testes de máscaras e validação (Vitest)
   styles.css                 Tema e layout responsivo
 ```
 
