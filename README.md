@@ -35,14 +35,25 @@ docs/       api.md (contrato da API) e cep.md (integração de CEP)
 
 ## Como rodar
 
-Pré-requisitos: Node.js e PostgreSQL.
+Pré-requisitos: Node.js e PostgreSQL (ou Docker).
 
 ### 1. Banco
+
+Com PostgreSQL instalado:
 
 ```bash
 createdb nogle
 psql nogle -f database/schema.sql
 ```
+
+Ou com Docker (não precisa de `psql` na máquina):
+
+```bash
+docker run -d --name nogle-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=nogle -p 5432:5432 postgres:17-alpine
+docker exec -i nogle-pg psql -U postgres -d nogle < database/schema.sql
+```
+
+Para parar e religar depois: `docker stop nogle-pg` e `docker start nogle-pg` (os dados ficam no container).
 
 ### 2. Backend
 
@@ -58,6 +69,7 @@ npm run dev               # http://localhost:3333/api
 | `DATABASE_URL` | `postgres://postgres:postgres@localhost:5432/nogle` | Conexão com o PostgreSQL |
 | `PORT` | `3333` | Porta da API |
 | `CORS_ORIGIN` | `http://localhost:5173` | Origem permitida no CORS |
+| `TEST_DATABASE_URL` | (vazio) | Opcional: banco descartável para os testes de integração |
 
 Scripts: `npm run dev` (watch), `npm run build`, `npm start`, `npm test`, `npm run db:generate` (gera migration a partir do schema Drizzle).
 
@@ -73,7 +85,7 @@ npm run dev               # http://localhost:5173
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:3333/api` | URL base da API |
-| `VITE_USE_MOCK` | `true` no `.env.example` | `true` usa dados em memória (sem backend); use `false` para a API real |
+| `VITE_USE_MOCK` | `true` no `.env.example` | `true` usa dados em memória (sem backend); **troque para `false` para usar a API real** (backend e banco rodando) |
 
 Scripts: `npm run dev`, `npm run build` (checagem de tipos + build), `npm run preview`.
 
@@ -83,7 +95,8 @@ Base URL `http://localhost:3333/api`, JSON em tudo. CPF, telefone e CEP trafegam
 
 | Método | Rota | Descrição | Sucesso |
 |---|---|---|---|
-| GET | `/clientes?nome=&cpf=&ativo=` | Lista. `ativo`: `true` (padrão), `false` ou `all` | 200 |
+| GET | `/clientes?nome=&cpf=&estado=&cidade=&ativo=` | Lista com filtros combináveis. `ativo`: `true` (padrão), `false` ou `all` | 200 |
+| GET | `/clientes/resumo?nome=&cpf=&estado=&cidade=` | Contadores `{ ativos, inativos, total }` com os mesmos filtros | 200 |
 | GET | `/clientes/:id` | Busca um cliente | 200 |
 | POST | `/clientes` | Cria | 201 |
 | PUT | `/clientes/:id` | Edita | 200 |
@@ -169,4 +182,12 @@ frontend/src/
 cd backend && npm test
 ```
 
-Cobrem as rotas de clientes, a validação de CPF e o serviço de CEP (sucesso, fallback, CEP inexistente, provedores fora do ar e CEP inválido).
+- **Unitários** (sem banco): rotas de clientes (com o service mockado), validação de CPF e serviço de CEP (sucesso, fallback, CEP inexistente, provedores fora do ar e CEP inválido).
+- **Integração** (PostgreSQL real): criar, editar, CPF duplicado (409), inativar/reativar, 404 e filtros (nome, CPF, estado, cidade, resumo). Rodam só quando `TEST_DATABASE_URL` está definido, e **recriam a tabela `clientes`**, então use um banco descartável:
+
+```bash
+docker exec nogle-pg psql -U postgres -c "CREATE DATABASE nogle_test"
+TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/nogle_test npm test
+```
+
+Sem a variável, esses testes são pulados. O frontend tem os seus em `cd frontend && npm test`.
