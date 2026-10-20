@@ -122,6 +122,11 @@ button, input { font: inherit; color: inherit; }
 .tabela tr.inativo .nome-cell { font-weight: 500; }
 .tabela tr.inativo .mono { background: #e2e6e9; color: #5b6770; }
 .acoes .btn-reativar { color: var(--accent); }
+.tabela tr.destaque td { animation: destaque 2.5s ease-out; }
+@keyframes destaque { from { background: #bff3e4; } to { background: transparent; } }
+.dialog-foot-aviso { align-items: center; background: var(--danger-soft); }
+.dialog-foot-aviso p { margin: 0 auto 0 0; font-weight: 600; color: var(--danger); }
+@media (max-width: 720px) { .dialog-foot-aviso { flex-wrap: wrap; } .dialog-foot-aviso p { flex-basis: 100%; } }
 .selo { font: 600 12px var(--font-body); padding: 2px 8px; border-radius: 999px; background: #e2e6e9; color: #4a5660; }
 
 /* Estados */

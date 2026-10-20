@@ -32,6 +32,15 @@ export function ClienteModal({ cliente, onClose, onSaved }: Props) {
   const [errors, setErrors] = useState<FieldErrors>({})
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const [confirmandoSaida, setConfirmandoSaida] = useState(false)
+  const base = useRef(inicial(cliente))
+  const sujo = JSON.stringify(values) !== JSON.stringify(base.current)
+
+  // Com dados digitados, pede confirmação antes de descartar (botão Cancelar, X, ESC e clique fora).
+  const tentarFechar = () => {
+    if (sujo) setConfirmandoSaida(true)
+    else onClose()
+  }
   const formRef = useRef<HTMLFormElement>(null)
 
   // Em edição o CEP já salvo não é reconsultado (não sobrescreve o endereço do cliente).
@@ -110,11 +119,11 @@ export function ClienteModal({ cliente, onClose, onSaved }: Props) {
   })
 
   return (
-    <Dialog titleId="modal-titulo" onClose={onClose} busy={saving} className="dialog-form">
+    <Dialog titleId="modal-titulo" onClose={tentarFechar} busy={saving} className="dialog-form">
       <form ref={formRef} onSubmit={submit} noValidate>
         <header className="dialog-head">
           <h2 id="modal-titulo">{cliente ? 'Editar cliente' : 'Novo cliente'}</h2>
-          <button type="button" className="icon-btn" aria-label="Fechar" onClick={onClose} disabled={saving}>
+          <button type="button" className="icon-btn" aria-label="Fechar" onClick={tentarFechar} disabled={saving}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </header>
@@ -148,13 +157,21 @@ export function ClienteModal({ cliente, onClose, onSaved }: Props) {
           {formError && <p className="form-error" role="alert">{formError}</p>}
         </div>
 
-        <footer className="dialog-foot">
-          <button type="button" className="btn btn-ghost" onClick={onClose} disabled={saving}>Cancelar</button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving && <span className="spinner" aria-hidden="true" />}
-            {saving ? 'Salvando…' : 'Salvar'}
-          </button>
-        </footer>
+        {confirmandoSaida ? (
+          <footer className="dialog-foot dialog-foot-aviso" role="alertdialog" aria-label="Descartar alterações">
+            <p>Descartar as alterações feitas?</p>
+            <button type="button" className="btn btn-ghost" onClick={() => setConfirmandoSaida(false)} autoFocus>Continuar editando</button>
+            <button type="button" className="btn btn-danger" onClick={onClose}>Descartar</button>
+          </footer>
+        ) : (
+          <footer className="dialog-foot">
+            <button type="button" className="btn btn-ghost" onClick={tentarFechar} disabled={saving}>Cancelar</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving && <span className="spinner" aria-hidden="true" />}
+              {saving ? 'Salvando…' : 'Salvar'}
+            </button>
+          </footer>
+        )}
       </form>
     </Dialog>
   )
