@@ -19,6 +19,7 @@ export default function App() {
   const [erro, setErro] = useState<string | null>(null)
   const [modal, setModal] = useState<Modal>(null)
   const [aviso, setAviso] = useState<string | null>(null)
+  const [destaqueId, setDestaqueId] = useState<number | null>(null)
   const [reativando, setReativando] = useState<number | null>(null)
   const reqId = useRef(0)
   const origem = useRef<HTMLElement | null>(null)
@@ -40,6 +41,12 @@ export default function App() {
   useEffect(() => { void carregar() }, [carregar])
 
   useEffect(() => {
+    if (destaqueId === null) return
+    const t = setTimeout(() => setDestaqueId(null), 2500)
+    return () => clearTimeout(t)
+  }, [destaqueId])
+
+  useEffect(() => {
     if (!aviso) return
     const t = setTimeout(() => setAviso(null), 4000)
     return () => clearTimeout(t)
@@ -49,6 +56,7 @@ export default function App() {
     setReativando(c.id)
     try {
       await reativarCliente(c.id)
+      setDestaqueId(c.id)
       setAviso('Cliente reativado')
       await carregar()
     } catch (e) {
@@ -137,6 +145,7 @@ export default function App() {
                 onInativar={(c) => abrir({ tipo: 'inativar', cliente: c })}
                 onReativar={(c) => void reativar(c)}
                 reativando={reativando}
+                destaqueId={destaqueId}
               />
             </div>
           )}
@@ -151,7 +160,7 @@ export default function App() {
         <ClienteModal
           cliente={modal.cliente}
           onClose={fechar}
-          onSaved={(_c, criado) => { fechar(); setAviso(criado ? 'Cliente cadastrado' : 'Alterações salvas'); void carregar() }}
+          onSaved={(salvo, criado) => { fechar(); setDestaqueId(salvo.id); setAviso(criado ? 'Cliente cadastrado' : 'Alterações salvas'); void carregar() }}
         />
       )}
       {modal?.tipo === 'inativar' && (

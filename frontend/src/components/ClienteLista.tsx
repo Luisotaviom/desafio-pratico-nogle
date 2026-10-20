@@ -7,6 +7,7 @@ interface Props {
   onInativar: (c: Cliente) => void
   onReativar: (c: Cliente) => void
   reativando: number | null
+  destaqueId: number | null
 }
 
 function Iniciais({ nome }: { nome: string }) {
@@ -34,7 +35,7 @@ function Acoes({ c, onEdit, onInativar }: { c: Cliente } & Pick<Props, 'onEdit' 
 }
 
 /** Tabela em telas largas; no CSS ela vira cards em telas estreitas. */
-export function ClienteLista({ clientes, onEdit, onInativar, onReativar, reativando }: Props) {
+export function ClienteLista({ clientes, onEdit, onInativar, onReativar, reativando, destaqueId }: Props) {
   return (
     <table className="tabela">
       <caption className="sr-only">Clientes cadastrados</caption>
@@ -49,7 +50,7 @@ export function ClienteLista({ clientes, onEdit, onInativar, onReativar, reativa
       </thead>
       <tbody>
         {clientes.map((c) => (
-          <tr key={c.id} className={c.ativo ? undefined : 'inativo'}>
+          <tr key={c.id} className={[c.ativo ? '' : 'inativo', c.id === destaqueId ? 'destaque' : ''].filter(Boolean).join(' ') || undefined}>
             <td data-label="Nome">
               <span className="nome-cell"><Iniciais nome={c.nome} /><span>{c.nome}</span>{!c.ativo && <span className="selo">Inativo</span>}</span>
             </td>
