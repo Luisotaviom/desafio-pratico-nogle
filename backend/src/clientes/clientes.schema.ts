@@ -49,12 +49,23 @@ export const clienteInputSchema = z.object({
 
 export type ClienteInput = z.infer<typeof clienteInputSchema>;
 
-export const listaQuerySchema = z.object({
+const filtrosSchema = z.object({
   nome: z.string().trim().optional(),
   cpf: z.string().optional(),
+  estado: z.preprocess(
+    (v) => (typeof v === 'string' ? v.trim().toUpperCase() || undefined : v),
+    z.string().regex(/^[A-Z]{2}$/, 'estado deve ter 2 letras').optional(),
+  ),
+  cidade: z.string().trim().optional(),
+});
+
+export const listaQuerySchema = filtrosSchema.extend({
   ativo: z.enum(['true', 'false', 'all'], { error: 'ativo deve ser true, false ou all' }).default('true'),
 });
 
+export const resumoQuerySchema = filtrosSchema;
+
+export type Filtros = z.infer<typeof filtrosSchema>;
 export type ListaQuery = z.infer<typeof listaQuerySchema>;
 
 export const idSchema = z.coerce.number().int().positive();

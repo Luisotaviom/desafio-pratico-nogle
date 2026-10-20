@@ -41,7 +41,8 @@ backend e frontend não o alteram (mudanças só pela `main`).
 
 | Método | Rota | Descrição | Sucesso |
 |---|---|---|---|
-| GET | `/clientes?nome=&cpf=&ativo=` | Lista. `nome`: contém, sem diferenciar maiúsculas. `cpf`: contém, só dígitos. `ativo`: `true` (padrão), `false` ou `all` | 200 `Cliente[]` |
+| GET | `/clientes?nome=&cpf=&estado=&cidade=&ativo=` | Lista. `nome`: contém, sem diferenciar maiúsculas. `cpf`: contém, só dígitos. `estado`: UF exata (2 letras, aceita minúsculas). `cidade`: contém, sem diferenciar maiúsculas. `ativo`: `true` (padrão), `false` ou `all`. Filtros combinam (E) | 200 `Cliente[]` |
+| GET | `/clientes/resumo?nome=&cpf=&estado=&cidade=` | Contadores com os mesmos filtros da lista (sem `ativo`) | 200 `{ ativos, inativos, total }` |
 | GET | `/clientes/:id` | Busca um | 200 `Cliente` |
 | POST | `/clientes` | Cria (sem `id` e `ativo`) | 201 `Cliente` |
 | PUT | `/clientes/:id` | Edita todos os campos editáveis | 200 `Cliente` |

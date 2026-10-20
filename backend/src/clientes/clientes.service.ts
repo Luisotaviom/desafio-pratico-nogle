@@ -3,7 +3,7 @@ import { db } from '../db';
 import { clientes } from '../db/schema';
 import { AppError } from '../lib/erros';
 import { somenteDigitos } from '../lib/cpf';
-import type { ClienteInput, ListaQuery } from './clientes.schema';
+import type { ClienteInput, Filtros, ListaQuery } from './clientes.schema';
 
 const colunas = {
   id: clientes.id,
@@ -38,18 +38,37 @@ function naoEncontrado(): never {
   throw new AppError('NOT_FOUND', 'Cliente não encontrado');
 }
 
-export async function listar({ nome, cpf, ativo }: ListaQuery) {
+function filtrosDe({ nome, cpf, estado, cidade }: Filtros): SQL[] {
   const filtros: SQL[] = [];
   if (nome) filtros.push(ilike(clientes.nome, `%${escapeLike(nome)}%`));
   const cpfDigitos = cpf ? somenteDigitos(cpf) : '';
   if (cpfDigitos) filtros.push(ilike(clientes.cpf, `%${cpfDigitos}%`));
-  if (ativo !== 'all') filtros.push(eq(clientes.ativo, ativo === 'true'));
+  if (estado) filtros.push(eq(clientes.estado, estado));
+  if (cidade) filtros.push(ilike(clientes.cidade, `%${escapeLike(cidade)}%`));
+  return filtros;
+}
+
+export async function listar({ ativo, ...filtros }: ListaQuery) {
+  const condicoes = filtrosDe(filtros);
+  if (ativo !== 'all') condicoes.push(eq(clientes.ativo, ativo === 'true'));
 
   return db
     .select(colunas)
     .from(clientes)
-    .where(and(...filtros))
+    .where(and(...condicoes))
     .orderBy(sql`lower(${clientes.nome})`, clientes.id);
+}
+
+export async function resumo(filtros: Filtros) {
+  const [linha] = await db
+    .select({
+      ativos: sql<number>`count(*) filter (where ${clientes.ativo})::int`,
+      inativos: sql<number>`count(*) filter (where not ${clientes.ativo})::int`,
+      total: sql<number>`count(*)::int`,
+    })
+    .from(clientes)
+    .where(and(...filtrosDe(filtros)));
+  return linha;
 }
 
 export async function buscar(id: number) {
