@@ -37,7 +37,7 @@ docs/       api.md (contrato da API) e cep.md (integração de CEP)
 
 ## Como rodar
 
-Pré-requisitos: Node.js e PostgreSQL (ou Docker).
+Pré-requisitos: Node.js 20 ou superior (desenvolvido e testado com Node 25) e PostgreSQL (ou Docker).
 
 ### 1. Banco
 
@@ -47,6 +47,8 @@ Com PostgreSQL instalado:
 createdb nogle
 psql nogle -f database/schema.sql
 ```
+
+O `DATABASE_URL` padrão do backend usa o usuário `postgres` com senha `postgres`. Num PostgreSQL instalado localmente, ajuste a URL no `backend/.env` para o seu usuário (ex.: `postgres://SEU_USUARIO@localhost:5432/nogle`).
 
 Ou com Docker (não precisa de `psql` na máquina):
 
@@ -73,7 +75,7 @@ npm run dev               # http://localhost:3333/api
 | `CORS_ORIGIN` | `http://localhost:5173` | Origem permitida no CORS |
 | `TEST_DATABASE_URL` | (vazio) | Opcional: banco descartável para os testes de integração |
 
-Scripts: `npm run dev` (watch), `npm run build`, `npm start`, `npm test`, `npm run db:generate` (gera migration a partir do schema Drizzle).
+Scripts: `npm run dev` (watch), `npm run build`, `npm start` (roda `dist/`, então rode `npm run build` antes), `npm test`, `npm run db:generate` (gera migration a partir do schema Drizzle).
 
 ### 3. Frontend
 
@@ -106,6 +108,8 @@ Base URL `http://localhost:3333/api`, JSON em tudo. CPF, telefone e CEP trafegam
 | PATCH | `/clientes/:id/ativar` | Reativa (idempotente) | 200 |
 | GET | `/cep/:cep` | Consulta CEP (ViaCEP, fallback BrasilAPI) | 200 |
 
+Filtros de `GET /clientes` (combinam entre si): `nome` e `cidade` são "contém", sem diferenciar maiúsculas; `cpf` é "contém" e ignora a máscara; `estado` é a UF exata e aceita minúsculas.
+
 Erros seguem um formato único:
 
 ```json
@@ -114,7 +118,7 @@ Erros seguem um formato único:
 
 | Código | HTTP | Quando |
 |---|---|---|
-| `VALIDATION_ERROR` | 400 | Dados inválidos (`fields` indica o campo) |
+| `VALIDATION_ERROR` | 400 | Dados inválidos ou JSON malformado (`fields` indica o campo) |
 | `NOT_FOUND` | 404 | Cliente, CEP ou rota inexistente |
 | `CPF_DUPLICADO` | 409 | CPF já cadastrado |
 | `CEP_INDISPONIVEL` | 502 | Os dois provedores de CEP falharam |
@@ -141,6 +145,8 @@ Tabela única, `clientes`. O script oficial é [`database/schema.sql`](database/
 | `criado_em` / `atualizado_em` | `timestamptz` | padrão `now()` |
 
 Índice: `idx_clientes_nome` em `LOWER(nome)`, para o filtro por nome. As regras ficam também como `CHECK` no banco, então dados inválidos são barrados mesmo fora da API.
+
+As migrations em `database/migrations/` são geradas pelo `drizzle-kit` a partir do schema Drizzle, só para registrar o histórico. O projeto **não as aplica**: o banco é criado com o `schema.sql`, que é o script oficial.
 
 ## Backend
 
