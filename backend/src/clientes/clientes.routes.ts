@@ -10,6 +10,7 @@ const asyncHandler =
 export const clientesRouter = Router();
 
 clientesRouter.get('/', asyncHandler(controller.listar));
+clientesRouter.get('/resumo', asyncHandler(controller.resumo));
 clientesRouter.get('/:id', asyncHandler(controller.buscar));
 clientesRouter.post('/', asyncHandler(controller.criar));
 clientesRouter.put('/:id', asyncHandler(controller.atualizar));

@@ -123,3 +123,33 @@ describe('PATCH /api/clientes/:id/ativar', () => {
     expect(res.body.error.code).toBe('NOT_FOUND');
   });
 });
+
+describe('filtros por estado e cidade', () => {
+  it('normaliza a UF e repassa cidade ao service', async () => {
+    vi.mocked(service.listar).mockResolvedValue([]);
+
+    await request(app).get('/api/clientes?estado=sp&cidade=%20campinas%20');
+
+    expect(service.listar).toHaveBeenCalledWith({ estado: 'SP', cidade: 'campinas', ativo: 'true' });
+  });
+
+  it('rejeita UF inválida', async () => {
+    const res = await request(app).get('/api/clientes?estado=SPX');
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.fields.estado).toBeDefined();
+  });
+});
+
+describe('GET /api/clientes/resumo', () => {
+  it('devolve os contadores sem cair na rota /:id', async () => {
+    vi.mocked(service.resumo).mockResolvedValue({ ativos: 2, inativos: 1, total: 3 });
+
+    const res = await request(app).get('/api/clientes/resumo?estado=SP');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ativos: 2, inativos: 1, total: 3 });
+    expect(service.resumo).toHaveBeenCalledWith({ estado: 'SP' });
+    expect(service.buscar).not.toHaveBeenCalled();
+  });
+});

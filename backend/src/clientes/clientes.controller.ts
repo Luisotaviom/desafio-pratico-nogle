@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../lib/erros';
-import { clienteInputSchema, idSchema, listaQuerySchema } from './clientes.schema';
+import { clienteInputSchema, idSchema, listaQuerySchema, resumoQuerySchema } from './clientes.schema';
 import * as service from './clientes.service';
 import type { ZodError } from 'zod';
 
@@ -29,6 +29,11 @@ function lerId(req: Request): number {
 export async function listar(req: Request, res: Response) {
   const query = validar(listaQuerySchema.safeParse(req.query));
   res.json(await service.listar(query));
+}
+
+export async function resumo(req: Request, res: Response) {
+  const query = validar(resumoQuerySchema.safeParse(req.query));
+  res.json(await service.resumo(query));
 }
 
 export async function buscar(req: Request, res: Response) {
