@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ApiError, listarClientes, reativarCliente } from './api/clientes'
+import { ApiError, listarClientes, reativarCliente, resumoClientes, type Resumo } from './api/clientes'
 import { ClienteLista } from './components/ClienteLista'
 import { ClienteModal } from './components/ClienteModal'
 import { ConfirmInativar } from './components/ConfirmInativar'
 import { useDebounce } from './hooks/useDebounce'
-import { maskCpf, onlyDigits } from './lib/format'
+import { UFS, maskCpf, onlyDigits } from './lib/format'
 import type { Cliente } from './types'
 
 type Modal = { tipo: 'form'; cliente: Cliente | null } | { tipo: 'inativar'; cliente: Cliente } | null
@@ -14,6 +14,10 @@ export default function App() {
   const [cpf, setCpf] = useState('')
   const dNome = useDebounce(nome)
   const dCpf = useDebounce(cpf)
+  const [estado, setEstado] = useState('')
+  const [cidade, setCidade] = useState('')
+  const dCidade = useDebounce(cidade)
+  const [resumoApi, setResumoApi] = useState<Resumo | null>(null)
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
@@ -29,14 +33,21 @@ export default function App() {
     setLoading(true)
     setErro(null)
     try {
-      const data = await listarClientes({ nome: dNome, cpf: onlyDigits(dCpf), ativo: 'all' })
-      if (id === reqId.current) setClientes(data)
+      const filtros = { nome: dNome, cpf: onlyDigits(dCpf), estado, cidade: dCidade }
+      const [data, resumo] = await Promise.all([
+        listarClientes({ ...filtros, ativo: 'all' }),
+        resumoClientes(filtros).catch(() => null), // contador é complementar: se falhar, usa a lista
+      ])
+      if (id === reqId.current) {
+        setClientes(data)
+        setResumoApi(resumo)
+      }
     } catch (e) {
       if (id === reqId.current) setErro(e instanceof ApiError ? e.message : 'Erro inesperado ao carregar')
     } finally {
       if (id === reqId.current) setLoading(false)
     }
-  }, [dNome, dCpf])
+  }, [dNome, dCpf, estado, dCidade])
 
   useEffect(() => { void carregar() }, [carregar])
 
@@ -69,9 +80,9 @@ export default function App() {
   const abrir = (m: Modal) => { origem.current = document.activeElement as HTMLElement; setModal(m) }
   const fechar = () => { setModal(null); origem.current?.focus() }
 
-  const filtrando = Boolean(dNome.trim() || dCpf)
-  const ativos = clientes.filter((c) => c.ativo).length
-  const inativos = clientes.length - ativos
+  const filtrando = Boolean(dNome.trim() || dCpf || estado || dCidade.trim())
+  const ativos = resumoApi?.ativos ?? clientes.filter((c) => c.ativo).length
+  const inativos = resumoApi?.inativos ?? clientes.length - ativos
   const resumo =
     `${ativos} ${ativos === 1 ? 'cliente ativo' : 'clientes ativos'}` +
     (inativos ? ` · ${inativos} ${inativos === 1 ? 'inativo' : 'inativos'}` : '') +
@@ -112,8 +123,19 @@ export default function App() {
               <input id="filtro-cpf" inputMode="numeric" value={cpf} onChange={(e) => setCpf(maskCpf(e.target.value))} autoComplete="off" placeholder="000.000.000-00" />
             </div>
           </div>
+          <div className="field field-uf">
+            <label htmlFor="filtro-uf">Estado</label>
+            <select id="filtro-uf" value={estado} onChange={(e) => setEstado(e.target.value)}>
+              <option value="">Todos</option>
+              {UFS.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="filtro-cidade">Cidade</label>
+            <input id="filtro-cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} autoComplete="off" placeholder="Ex.: São Paulo" />
+          </div>
           {filtrando && (
-            <button type="button" className="btn btn-ghost" onClick={() => { setNome(''); setCpf('') }}>Limpar filtros</button>
+            <button type="button" className="btn btn-ghost" onClick={() => { setNome(''); setCpf(''); setEstado(''); setCidade('') }}>Limpar filtros</button>
           )}
         </form>
 
@@ -132,7 +154,7 @@ export default function App() {
             <div className="estado">
               <svg className="estado-ico" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c.6-3.4 3.2-5.5 6.5-5.5s5.9 2.1 6.5 5.5M17 8h5M19.5 5.5v5" /></svg>
               <h2>{filtrando ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}</h2>
-              <p>{filtrando ? 'Ajuste o nome ou o CPF buscado.' : 'Cadastre o primeiro cliente para vê-lo aqui.'}</p>
+              <p>{filtrando ? 'Ajuste ou limpe os filtros.' : 'Cadastre o primeiro cliente para vê-lo aqui.'}</p>
               {!filtrando && (
                 <button type="button" className="btn btn-primary" onClick={() => abrir({ tipo: 'form', cliente: null })}>Novo cliente</button>
               )}

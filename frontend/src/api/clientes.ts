@@ -27,17 +27,37 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export interface ListParams {
   nome?: string
   cpf?: string
+  estado?: string
+  cidade?: string
   ativo?: 'true' | 'false' | 'all'
+}
+
+export interface Resumo {
+  ativos: number
+  inativos: number
+  total: number
+}
+
+function toQuery(params: ListParams): string {
+  const qs = new URLSearchParams()
+  if (params.nome?.trim()) qs.set('nome', params.nome.trim())
+  if (params.cpf) qs.set('cpf', params.cpf)
+  if (params.estado) qs.set('estado', params.estado)
+  if (params.cidade?.trim()) qs.set('cidade', params.cidade.trim())
+  if (params.ativo) qs.set('ativo', params.ativo)
+  const s = qs.toString()
+  return s ? `?${s}` : ''
 }
 
 export function listarClientes(params: ListParams = {}): Promise<Cliente[]> {
   if (USE_MOCK) return mockApi.list(params)
-  const qs = new URLSearchParams()
-  if (params.nome?.trim()) qs.set('nome', params.nome.trim())
-  if (params.cpf) qs.set('cpf', params.cpf)
-  if (params.ativo) qs.set('ativo', params.ativo)
-  const s = qs.toString()
-  return request<Cliente[]>(`/clientes${s ? `?${s}` : ''}`)
+  return request<Cliente[]>(`/clientes${toQuery(params)}`)
+}
+
+/** Contadores com os mesmos filtros da lista (sem `ativo`). */
+export function resumoClientes(params: ListParams = {}): Promise<Resumo> {
+  if (USE_MOCK) return mockApi.resumo(params)
+  return request<Resumo>(`/clientes/resumo${toQuery({ ...params, ativo: undefined })}`)
 }
 
 export function criarCliente(input: ClienteInput): Promise<Cliente> {

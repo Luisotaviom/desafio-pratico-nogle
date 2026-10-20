@@ -22,6 +22,22 @@ const db: Cliente[] = [
   { id: 5, nome: 'Fernanda Rocha', cpf: '71428793860', telefone: '51977665544', cep: '90010000', cidade: 'Porto Alegre', estado: 'RS', endereco: 'Rua dos Andradas', bairro: 'Centro Histórico', numero: '45', complemento: 'Fundos', ativo: false },
 ]
 
+type Filtros = { nome?: string; cpf?: string; estado?: string; cidade?: string }
+
+function filtrar(f: Filtros): Cliente[] {
+  const nome = (f.nome ?? '').trim().toLowerCase()
+  const cpf = (f.cpf ?? '').replace(/\D/g, '')
+  const cidade = (f.cidade ?? '').trim().toLowerCase()
+  const estado = (f.estado ?? '').toUpperCase()
+  return db.filter(
+    (c) =>
+      c.nome.toLowerCase().includes(nome) &&
+      c.cpf.includes(cpf) &&
+      c.cidade.toLowerCase().includes(cidade) &&
+      (!estado || c.estado === estado),
+  )
+}
+
 const wait = (ms = 450) => new Promise((r) => setTimeout(r, ms))
 const clone = <T,>(v: T): T => structuredClone(v)
 
@@ -39,19 +55,16 @@ function validate(input: ClienteInput, ignoreId?: number) {
 }
 
 export const mockApi = {
-  async list(f: { nome?: string; cpf?: string; ativo?: 'true' | 'false' | 'all' }): Promise<Cliente[]> {
+  async list(f: Filtros & { ativo?: 'true' | 'false' | 'all' }): Promise<Cliente[]> {
     await wait()
-    const nome = (f.nome ?? '').trim().toLowerCase()
-    const cpf = (f.cpf ?? '').replace(/\D/g, '')
     const ativo = f.ativo ?? 'true'
-    return clone(
-      db.filter(
-        (c) =>
-          (ativo === 'all' || c.ativo === (ativo === 'true')) &&
-          c.nome.toLowerCase().includes(nome) &&
-          c.cpf.includes(cpf),
-      ),
-    )
+    return clone(filtrar(f).filter((c) => ativo === 'all' || c.ativo === (ativo === 'true')))
+  },
+  async resumo(f: Filtros): Promise<{ ativos: number; inativos: number; total: number }> {
+    await wait(150)
+    const lista = filtrar(f)
+    const ativos = lista.filter((c) => c.ativo).length
+    return { ativos, inativos: lista.length - ativos, total: lista.length }
   },
   async create(input: ClienteInput): Promise<Cliente> {
     await wait()
